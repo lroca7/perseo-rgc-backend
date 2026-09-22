@@ -1,5 +1,6 @@
 package com.perseo.rgc.controller
 
+import com.perseo.rgc.dto.ErrorResponse
 import com.perseo.rgc.dto.PagoCuotaRequest
 import com.perseo.rgc.dto.PrestamoRequest
 import com.perseo.rgc.dto.RegenerarTablaRequest
@@ -26,7 +27,7 @@ class PrestamoController(
 
     @PostMapping
     fun crear(@RequestBody req: PrestamoRequest): Prestamo {
-        val cuotas = amortizacionService.calcular(req.monto, req.tasa, req.numCuotas, req.fechaInicio)
+        val cuotas = amortizacionService.calcular(req.monto, req.tasa, req.numCuotas, req.fechaInicio, req.aplicarGraciaDiciembre)
         val prestamo = Prestamo(
             socioId = req.socioId, monto = req.monto, tasa = req.tasa, numCuotas = req.numCuotas,
             fechaInicio = req.fechaInicio, estado = "activo", cuotas = cuotas,
@@ -34,14 +35,41 @@ class PrestamoController(
         return prestamoRepository.save(prestamo)
     }
 
+    /**
+     * Genera o regenera la tabla de amortización. Se bloquea si ya hay cuotas REALES
+     * (no de gracia) pagadas, para no perder ese historial por accidente.
+     */
     @PostMapping("/{id}/generar-tabla")
-    fun generarTabla(@PathVariable id: String, @RequestBody req: RegenerarTablaRequest): ResponseEntity<Prestamo> {
+    fun generarTabla(@PathVariable id: String, @RequestBody req: RegenerarTablaRequest): ResponseEntity<Any> {
         val prestamo = prestamoRepository.findById(id).orElse(null) ?: return ResponseEntity.notFound().build()
+        if (amortizacionService.tienePagosReales(prestamo)) {
+            return ResponseEntity.status(409).body(
+                ErrorResponse("No se puede regenerar la tabla: ya hay cuotas reales pagadas. Elimina la tabla primero solo si estás seguro de perder ese historial.")
+            )
+        }
         val saldoBase = amortizacionService.saldoPendiente(prestamo)
         prestamo.tasa = req.tasa
         prestamo.numCuotas = req.numCuotas
         prestamo.fechaInicio = req.fechaInicio
-        prestamo.cuotas = amortizacionService.calcular(saldoBase, req.tasa, req.numCuotas, req.fechaInicio)
+        prestamo.cuotas = amortizacionService.calcular(saldoBase, req.tasa, req.numCuotas, req.fechaInicio, req.aplicarGraciaDiciembre)
+        return ResponseEntity.ok(prestamoRepository.save(prestamo))
+    }
+
+    /**
+     * Elimina la tabla de amortización, dejando el préstamo como recién migrado
+     * (sin cuotas). Bloqueado si ya hay cuotas reales pagadas.
+     */
+    @DeleteMapping("/{id}/tabla")
+    fun eliminarTabla(@PathVariable id: String): ResponseEntity<Any> {
+        val prestamo = prestamoRepository.findById(id).orElse(null) ?: return ResponseEntity.notFound().build()
+        if (amortizacionService.tienePagosReales(prestamo)) {
+            return ResponseEntity.status(409).body(
+                ErrorResponse("No se puede eliminar la tabla: ya hay cuotas reales pagadas. Elimina el préstamo completo si de verdad quieres empezar de cero.")
+            )
+        }
+        prestamo.cuotas = mutableListOf()
+        prestamo.numCuotas = 0
+        prestamo.estado = "activo"
         return ResponseEntity.ok(prestamoRepository.save(prestamo))
     }
 
@@ -52,7 +80,7 @@ class PrestamoController(
         @RequestBody req: PagoCuotaRequest,
     ): ResponseEntity<Prestamo> {
         val prestamo = prestamoRepository.findById(id).orElse(null) ?: return ResponseEntity.notFound().build()
-        val cuota = prestamo.cuotas.find { it.numero == numero } ?: return ResponseEntity.badRequest().build()
+        val cuota = prestamo.cuotas.find { it.numero == numero && !it.esGracia } ?: return ResponseEntity.badRequest().build()
         cuota.pagado = true
         cuota.fechaPago = req.fechaPago
         cuota.montoPagado = req.montoPagado

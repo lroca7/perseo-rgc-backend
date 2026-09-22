@@ -22,12 +22,14 @@ data class PrestamoRequest(
     val tasa: Double,
     val numCuotas: Int,
     val fechaInicio: LocalDate,
+    val aplicarGraciaDiciembre: Boolean = true,
 )
 
 data class RegenerarTablaRequest(
     val tasa: Double,
     val numCuotas: Int,
     val fechaInicio: LocalDate,
+    val aplicarGraciaDiciembre: Boolean = true,
 )
 
 data class PagoCuotaRequest(
@@ -45,6 +47,8 @@ data class GastoRequest(
 data class LiquidarUtilidadRequest(
     val periodo: String,
 )
+
+data class ErrorResponse(val error: String)
 
 data class ConfigRequest(
     val tasaDefault: Double,
