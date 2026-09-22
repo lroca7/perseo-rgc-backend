@@ -1,6 +1,7 @@
 package com.perseo.rgc.model
 
 import org.springframework.data.annotation.Id
+import org.springframework.data.mongodb.core.index.Indexed
 import org.springframework.data.mongodb.core.mapping.Document
 import java.time.LocalDate
 
@@ -15,6 +16,7 @@ data class Socio(
 @Document(collection = "aportes")
 data class Aporte(
     @Id val id: String? = null,
+    @Indexed
     var socioId: String,
     /** Formato "YYYY-MM" */
     var periodo: String,
@@ -39,6 +41,7 @@ data class Cuota(
 @Document(collection = "prestamos")
 data class Prestamo(
     @Id val id: String? = null,
+    @Indexed
     var socioId: String,
     var monto: Long,
     /** Tasa mensual como fracción, ej 0.05 = 5% */
