@@ -1,0 +1,20 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: perseo-rgc-backend
+  data:
+    mongodb:
+      # En producción/uso normal, exporta MONGODB_URI con tu cadena de conexión de Atlas, ej:
+      # mongodb+srv://usuario:password@cluster0.xxxxx.mongodb.net/perseo_rgc?retryWrites=true&w=majority
+      # Si no se define, cae a un Mongo local (útil solo para desarrollo sin internet vía docker-compose).
+      uri: ${MONGODB_URI:mongodb://localhost:27017/perseo_rgc}
+
+app:
+  seed-on-empty: true
+  cors:
+    allowed-origins:
+      - http://localhost:5173
+      - http://127.0.0.1:5173
+  default-tasa-interes: 0.05
