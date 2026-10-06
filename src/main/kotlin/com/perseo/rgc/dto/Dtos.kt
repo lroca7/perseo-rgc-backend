@@ -12,13 +12,13 @@ data class AporteRequest(
     val socioId: String,
     val periodo: String,
     val fecha: LocalDate,
-    val monto: Long,
+    val monto: Double,
     val nota: String = "",
 )
 
 data class PrestamoRequest(
     val socioId: String,
-    val monto: Long,
+    val monto: Double,
     val tasa: Double,
     val numCuotas: Int,
     val fechaInicio: LocalDate,
@@ -34,14 +34,14 @@ data class RegenerarTablaRequest(
 
 data class PagoCuotaRequest(
     val fechaPago: LocalDate,
-    val montoPagado: Long,
+    val montoPagado: Double,
 )
 
 data class GastoRequest(
     val concepto: String,
     val periodo: String,
     val fecha: LocalDate,
-    val monto: Long,
+    val monto: Double,
 )
 
 data class LiquidarUtilidadRequest(
@@ -52,40 +52,41 @@ data class ErrorResponse(val error: String)
 
 data class ConfigRequest(
     val tasaDefault: Double,
+    val ajusteBancos: Double = 0.0,
 )
 
 data class SocioSaldoResponse(
     val socioId: String,
     val nombre: String,
     val activo: Boolean,
-    val aportes: Long,
-    val prestamoPendiente: Long,
-    val utilidadRecibida: Long,
-    val saldoNeto: Long,
+    val aportes: Double,
+    val prestamoPendiente: Double,
+    val utilidadRecibida: Double,
+    val saldoNeto: Double,
 )
 
 data class ResumenResponse(
-    val bancos: Long,
-    val aportesTotales: Long,
-    val prestamosPendientes: Long,
-    val utilidadSinLiquidar: Long,
-    val interesesMesActual: Long,
+    val bancos: Double,
+    val aportesTotales: Double,
+    val prestamosPendientes: Double,
+    val utilidadSinLiquidar: Double,
+    val interesesMesActual: Double,
     val saldosPorSocio: List<SocioSaldoResponse>,
 )
 
 data class UtilidadPeriodoResponse(
     val periodo: String,
-    val intereses: Long,
-    val gastos: Long,
-    val neta: Long,
+    val intereses: Double,
+    val gastos: Double,
+    val neta: Double,
     val distribucion: List<com.perseo.rgc.model.DistribucionItem>,
     val yaLiquidado: Boolean,
 )
 
 data class ProyeccionMesResponse(
     val periodo: String,
-    val interesesMes: Long,
-    val utilidadMes: Long,
-    val acumUtilidad: Long,
-    val acumAportes: Long,
+    val interesesMes: Double,
+    val utilidadMes: Double,
+    val acumUtilidad: Double,
+    val acumAportes: Double,
 )

@@ -24,3 +24,7 @@ application-secrets.yml
 
 # Kotlin
 .kotlin/
+
+gradlew/
+gradlew
+gradlew.bat

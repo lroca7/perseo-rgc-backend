@@ -9,7 +9,9 @@ spring:
       # En producción/uso normal, exporta MONGODB_URI con tu cadena de conexión de Atlas, ej:
       # mongodb+srv://usuario:password@cluster0.xxxxx.mongodb.net/perseo_rgc?retryWrites=true&w=majority
       # Si no se define, cae a un Mongo local (útil solo para desarrollo sin internet vía docker-compose).
-      uri: ${MONGODB_URI:mongodb://localhost:27017/perseo_rgc}
+      #uri: ${MONGODB_URI:mongodb://localhost:27017/perseo_rgc}
+      uri: mongodb+srv://lizethcabrales_db_user:vQg3pYDCZBnLmeeN@perseo.rd4ohks.mongodb.net/finance-rgc?retryWrites=true&w=majority
+      auto-index-creation: true
 
 app:
   seed-on-empty: true

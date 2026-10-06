@@ -38,6 +38,7 @@ class ConfigController(private val configRepository: ConfigRepository) {
     fun actualizar(@RequestBody req: ConfigRequest): ConfigGlobal {
         val actual = configRepository.findById("global").orElse(ConfigGlobal())
         actual.tasaDefault = req.tasaDefault
+        actual.ajusteBancos = req.ajusteBancos
         return configRepository.save(actual)
     }
 }
@@ -81,6 +82,6 @@ class ProyeccionController(private val saldosService: SaldosService) {
     @GetMapping
     fun proyectar(
         @RequestParam(defaultValue = "6") meses: Int,
-        @RequestParam(defaultValue = "0") aporteExtra: Long,
+        @RequestParam(defaultValue = "0") aporteExtra: Double,
     ): List<ProyeccionMesResponse> = saldosService.proyectar(meses, aporteExtra)
 }
