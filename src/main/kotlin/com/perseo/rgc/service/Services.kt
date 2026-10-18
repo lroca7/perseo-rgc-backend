@@ -29,7 +29,7 @@ class SaldosService(
         val prestamosPorSocio: Map<String, List<Prestamo>>,
         val gastos: List<Gasto>,
         val utilidades: List<Utilidad>,
-        val ajusteBancos: Double,
+        val ajusteInteresesHistoricos: Double,
     )
 
     private fun cargarSnapshot(): Snapshot {
@@ -45,7 +45,7 @@ class SaldosService(
             prestamosPorSocio = prestamos.groupBy { it.socioId },
             gastos = gastos,
             utilidades = utilidades,
-            ajusteBancos = config.ajusteBancos,
+            ajusteInteresesHistoricos = config.ajusteInteresesHistoricos,
         )
     }
 
@@ -79,7 +79,7 @@ class SaldosService(
         val capitalRecuperado = capitalPrestado - totalPrestamosPendientesGeneral(snap)
         val intereses = interesesCobradosTotal(snap)
         val gastos = snap.gastos.sumOf { it.monto }
-        return redondear2(aportes - capitalPrestado + capitalRecuperado + intereses - gastos + snap.ajusteBancos)
+        return redondear2(aportes - capitalPrestado + capitalRecuperado + intereses - gastos + snap.ajusteInteresesHistoricos)
     }
 
     private fun utilidadPeriodo(snap: Snapshot, periodo: String): Triple<Double, Double, Double> {
@@ -111,7 +111,9 @@ class SaldosService(
         val periodoActual = YearMonth.now().toString()
         val (interesesMes, _, _) = utilidadPeriodo(snap, periodoActual)
         val gastosTotales = snap.gastos.sumOf { it.monto }
-        val utilidadSinLiquidar = redondear2(interesesCobradosTotal(snap) - gastosTotales - totalUtilidadLiquidada(snap))
+        val utilidadSinLiquidar = redondear2(
+            interesesCobradosTotal(snap) - gastosTotales - totalUtilidadLiquidada(snap) + snap.ajusteInteresesHistoricos
+        )
         val saldos = snap.socios.map { s ->
             val ap = redondear2(totalAportesSocio(snap, s.id!!))
             val pr = redondear2(totalPrestamoPendienteSocio(snap, s.id))
@@ -133,7 +135,12 @@ class SaldosService(
         val prestamos = snap.prestamosPorSocio.values.flatten()
         val sociosActivos = snap.socios.count { it.activo }
         var acumAportes = totalAportesGeneral(snap)
-        var acumUtilidad = totalUtilidadLiquidada(snap)
+        // Arranca desde la "utilidad sin liquidar" actual (intereses reales ya cobrados
+        // − gastos − lo ya liquidado + el ajuste de intereses históricos), igual que el
+        // Resumen — de lo contrario, préstamos migrados sin tabla "desaparecen" de la
+        // proyección en vez de contar como punto de partida.
+        var acumUtilidad = interesesCobradosTotal(snap) - snap.gastos.sumOf { it.monto } -
+                totalUtilidadLiquidada(snap) + snap.ajusteInteresesHistoricos
         val resultado = mutableListOf<ProyeccionMesResponse>()
         var fecha = LocalDate.now()
         for (k in 1..meses) {

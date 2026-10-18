@@ -52,7 +52,7 @@ data class ErrorResponse(val error: String)
 
 data class ConfigRequest(
     val tasaDefault: Double,
-    val ajusteBancos: Double = 0.0,
+    val ajusteInteresesHistoricos: Double = 0.0,
 )
 
 data class SocioSaldoResponse(

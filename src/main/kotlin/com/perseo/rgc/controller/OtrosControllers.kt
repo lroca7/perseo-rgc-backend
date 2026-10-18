@@ -38,7 +38,7 @@ class ConfigController(private val configRepository: ConfigRepository) {
     fun actualizar(@RequestBody req: ConfigRequest): ConfigGlobal {
         val actual = configRepository.findById("global").orElse(ConfigGlobal())
         actual.tasaDefault = req.tasaDefault
-        actual.ajusteBancos = req.ajusteBancos
+        actual.ajusteInteresesHistoricos = req.ajusteInteresesHistoricos
         return configRepository.save(actual)
     }
 }

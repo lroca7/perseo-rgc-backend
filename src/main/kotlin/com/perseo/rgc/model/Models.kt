@@ -87,9 +87,11 @@ data class ConfigGlobal(
     var tasaDefault: Double = 0.05,
     var ultimaLiquidacion: String? = null,
     /**
-     * Ajuste manual de conciliación bancaria: la diferencia entre el saldo real de
-     * bancos (ej. el que traía el Excel al momento de migrar) y el que la app calcula
-     * por su cuenta. Se suma tal cual a la fórmula de "Bancos". Puede ser negativo.
+     * Ajuste único de "intereses históricos no registrados": la parte de los intereses
+     * que el fondo ya había cobrado antes de migrar a esta app (ej. según el Excel) y que
+     * no quedó capturada como cuotas pagadas reales. Se fija una sola vez al migrar y
+     * alimenta tanto "Bancos" como "Utilidad sin liquidar" — NO afecta la liquidación
+     * mes a mes, que siempre se calcula solo con cuotas reales.
      */
-    var ajusteBancos: Double = 0.0,
+    var ajusteInteresesHistoricos: Double = 0.0,
 )
