@@ -39,6 +39,10 @@ class ConfigController(private val configRepository: ConfigRepository) {
         val actual = configRepository.findById("global").orElse(ConfigGlobal())
         actual.tasaDefault = req.tasaDefault
         actual.ajusteInteresesHistoricos = req.ajusteInteresesHistoricos
+        actual.aporteMensualSocio = req.aporteMensualSocio
+        actual.usarUltimoAporteReal = req.usarUltimoAporteReal
+        actual.numCuotasSimulacion = req.numCuotasSimulacion
+        actual.prestamosParciales = req.prestamosParciales
         return configRepository.save(actual)
     }
 }
@@ -84,4 +88,20 @@ class ProyeccionController(private val saldosService: SaldosService) {
         @RequestParam(defaultValue = "6") meses: Int,
         @RequestParam(defaultValue = "0") aporteExtra: Double,
     ): List<ProyeccionMesResponse> = saldosService.proyectar(meses, aporteExtra)
+}
+
+@RestController
+@RequestMapping("/api/capacidad-prestamos")
+class CapacidadPrestamoController(private val saldosService: SaldosService) {
+    /** Qué le corresponde a cada socio por sus aportes y en qué mes lo recibe. */
+    @GetMapping
+    fun listar(): List<CapacidadPrestamoItem> = saldosService.capacidadPrestamos()
+
+    /**
+     * Proyección mes a mes de la caja del fondo: cuánto entra (aportes + cobros),
+     * cuánto sale (préstamos + utilidad repartida) y cuánto queda disponible para
+     * prestar en cada mes. Misma simulación que `/api/capacidad-prestamos`.
+     */
+    @GetMapping("/fondo")
+    fun fondo(): FondoProyeccionResponse = saldosService.proyeccionFondo()
 }

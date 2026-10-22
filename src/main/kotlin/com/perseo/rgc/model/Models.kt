@@ -94,4 +94,29 @@ data class ConfigGlobal(
      * mes a mes, que siempre se calcula solo con cuotas reales.
      */
     var ajusteInteresesHistoricos: Double = 0.0,
+    /**
+     * Aporte mensual que se proyecta hacia adelante para cada socio activo en la
+     * simulación de capacidad de préstamos: es lo que se asume que cada socio
+     * sigue pagando mes a mes.
+     */
+    var aporteMensualSocio: Double = 200000.0,
+    /**
+     * Si es true, la simulación proyecta el último aporte realmente registrado de
+     * cada socio en lugar del valor global [aporteMensualSocio]. Útil porque no
+     * todos los socios aportan lo mismo.
+     */
+    var usarUltimoAporteReal: Boolean = false,
+    /**
+     * Número de cuotas del préstamo nuevo que se simula en la pantalla de capacidad.
+     * Define en cuántos meses ese préstamo devuelve capital e interés al fondo.
+     */
+    var numCuotasSimulacion: Int = 18,
+    /**
+     * Si es true, en la simulación de capacidad el fondo otorga en el mes de turno
+     * lo que puede prestar (el menor entre el cupo del socio y la caja disponible),
+     * en vez de esperar a poder prestar el cupo completo. Con esta opción todos los
+     * turnos se atienden en su mes, pero cada socio recibe una fracción de su
+     * capacidad y el fondo rota mucho más rápido.
+     */
+    var prestamosParciales: Boolean = false,
 )

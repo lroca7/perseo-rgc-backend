@@ -7,7 +7,14 @@ import java.time.LocalDate
 import kotlin.math.pow
 import kotlin.math.round
 
-/** Redondea a 2 decimales (centavos), evitando arrastrar errores de punto flotante. */
+/**
+ * Redondea a 2 decimales (centavos), evitando arrastrar errores de punto flotante.
+ *
+ * OJO con la regla de los empates: `kotlin.math.round` (que usa `Math.rint`)
+ * redondea **al par**. Es decir, 31177956.5 → 31177956 (no 31177957). Cualquier
+ * reimplementación de este redondeo (por ejemplo, en un script de Node) debe
+ * replicar esa regla para dar exactamente los mismos números.
+ */
 fun redondear2(x: Double): Double = round(x * 100.0) / 100.0
 
 @Service
